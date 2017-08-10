@@ -27,6 +27,9 @@ namespace TestMerge
 
         [Benchmark]
         public void 用ListWhere處理() => _benchClass.用ListWhere處理();
+
+        [Benchmark]
+        public void 用Join處理() => _benchClass.用Join處理();
     }
 
     internal class MyClass
@@ -83,7 +86,7 @@ namespace TestMerge
 
         public void 用Dictionary處理()
         {
-            var names = Enumerable.Range(1, _count).Select(i => new NameClass { Id = i, Name = i.ToString() });
+            var names = Enumerable.Range(1, _count).Select(i => new NameClass { Id = i, Name = i.ToString() }).ToList();
             var heights = Enumerable.Range(1, _count).Select(i => new HeightClass { Id = i, Height = i }).ToDictionary(k => k.Id, v => v);
             var weights = Enumerable.Range(1, _count).Select(i => new WeightClass { Id = i, Wieght = i }).ToDictionary(k => k.Id, v => v);
 
@@ -107,6 +110,26 @@ namespace TestMerge
             T2 value;
             dicts.TryGetValue(key, out value);
             return value;
+        }
+
+        public void 用Join處理()
+        {
+            var names = Enumerable.Range(1, _count).Select(i => new NameClass { Id = i, Name = i.ToString() }).ToList();
+            var heights = Enumerable.Range(1, _count).Select(i => new HeightClass { Id = i, Height = i }).ToList();
+            var weights = Enumerable.Range(1, _count).Select(i => new WeightClass { Id = i, Wieght = i }).ToList();
+
+            var result = (from n in names
+                join h in heights on n.Id equals h.Id
+                join w in weights on n.Id equals w.Id
+                select new NameHeightWeightClass
+                {
+                    Id = n.Id,
+                    Name = n.Name,
+                    Height = h.Height,
+                    Wieght = w.Wieght
+                }).ToList();
+
+            var resultCount = result.Count();
         }
     }
 
